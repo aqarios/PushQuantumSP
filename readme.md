@@ -1,4 +1,3 @@
-
 # Sensor Positioning Optimization
 
 This project provides tools to optimize sensor placement in a distribution environment using various classical and quantum models.
@@ -50,6 +49,17 @@ This project addresses the **sensor positioning problem**, which involves determ
 ### Model Descriptions
 
 The models span classical, quantum, and hybrid approaches. The classical baseline (Cplex) provides initial solutions, while transformations to QUBO enable compatibility with quantum methods like D-Wave and QAOA. QUBO models use either binary or one-hot encoding. Quantum models like QAOA and QAOAnsatz employ advanced Hamiltonians for constrained optimization, and the Grover model leverages quantum search algorithms (might not work correctly).
+
+## Plotting
+
+The `SPPlot` class generates a plot of either the problem or the solution. Both use the following color codes to understand whats going on.
+
+| Color     | Description                            |
+|:----------|:---------------------------------------|
+| 🔵 blue   | not reached, not covered street points |
+| 🟢 green  | reached street points                  |
+| 🟡 yellow | possible sensor positions              |
+| 🔴 red    | used solution sensor positions         |
 
 ## Example Usage
 
