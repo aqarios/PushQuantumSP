@@ -3,7 +3,7 @@ from models import SPCplex
 from evaluation.evaluation import SPEvaluation
 from plotting.sp_plot import SPPlot
 
-params = {"version": 1, "num_cols": 5, "rad_max": 2.4}
+params = {"version": 1, "num_cols": 5, "rad_max": 2.4}# params = {"version": 1~3, "num_cols": 2~inf, "rad_max": 2.4}
 data = SPData.gen_problem(**params)
 plt = SPPlot(data).plot_problem()
 plt.show()

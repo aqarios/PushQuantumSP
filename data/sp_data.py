@@ -484,7 +484,6 @@ class SPData:
         # Initialize empty graphs and lists
         merged_spdata.G = nx.Graph()
         merged_spdata.M = nx.Graph()
-        merged_spdata.schemeGraph = nx.Graph()
         merged_spdata.walls3D = []
         merged_spdata.listLidar3D = []
         merged_spdata.listStreetPoints3D = []
@@ -497,13 +496,31 @@ class SPData:
             merged_spdata.listStreetPointsNeverCovered.extend(spdata.listStreetPointsNeverCovered)
             merged_spdata.G.add_nodes_from(spdata.G.nodes(data=True))
             merged_spdata.G.add_edges_from(spdata.G.edges(data=True))
-
-            # Assuming walls and schemeGraph are consistent across instances
-            merged_spdata.walls3D.extend(spdata.walls3D)
+            merged_spdata.M.add_nodes_from(spdata.M.nodes(data=True))
             merged_spdata.M.add_edges_from(spdata.M.edges(data=True))
-            merged_spdata.schemeGraph.add_edges_from(spdata.schemeGraph.edges(data=True))
+            merged_spdata.walls3D.extend(spdata.walls3D)
 
-        # Optionally, you might want to call create_connections again
-        # merged_spdata.create_connections()
+        # To handle duplicates in walls3D (optional)
+        merged_spdata.walls3D = list(set(merged_spdata.walls3D))
+
+        # For schemeGraph, since it's a dict, we'll merge its contents appropriately
+        merged_spdata.schemeGraph = {}
+        for spdata in spdata_list:
+            for key, value in spdata.schemeGraph.items():
+                if key not in merged_spdata.schemeGraph:
+                    merged_spdata.schemeGraph[key] = value
+                else:
+                    # If the key already exists, we need to merge the lists
+                    if isinstance(value, list):
+                        merged_values = merged_spdata.schemeGraph[key]
+                        if isinstance(merged_values, list):
+                            merged_values.extend(value)
+                            # Remove duplicates if necessary
+                            merged_spdata.schemeGraph[key] = list(set(merged_values))
+                        else:
+                            merged_spdata.schemeGraph[key] = value
+                    else:
+                        # If it's not a list, overwrite or handle accordingly
+                        merged_spdata.schemeGraph[key] = value
 
         return merged_spdata

@@ -1,9 +1,10 @@
 import math
 import time
 import numpy as np
+import traceback
 
 
-class QuboSPBinary:
+class QuboSPBinaryBG:
     def __init__(self, gra, P1=1, P2=2, P3=2) -> None:
         self.gra = gra
 
@@ -15,6 +16,8 @@ class QuboSPBinary:
         self.model = self.__compute_QUBO_Matrix_binary(P1, P2, P3)
 
     def __inverter_matrix(self, sample):
+        print(f"len(self.usedLidars) = {len(self.usedLidars)}")
+        print(f"len(sample) = {len(sample)}")
         solution_dict = {
             f"x_{self.usedLidars[i][0]}_{self.usedLidars[i][1]}_{self.usedLidars[i][2]}_{self.usedLidars[i][3]}_{self.usedLidars[i][4]}": sample[
                 i
@@ -29,14 +32,20 @@ class QuboSPBinary:
         answer = solve_func(Q=self.model, **config)
         solve_time = time.time() - start_time
 
-        solution = self.__inverter_matrix(list(answer.first.sample.values()))
-        info = answer.info
+        solution = None
+        try:
+            solution = self.__inverter_matrix(list(answer.sample.values()))
+        except Exception as e:
+            print(f"list(answer.samples.values()) = {list(answer.sample.values())}")
+            print(e)
+            traceback.print_exc()
+            
+            pass
 
         return {
             "solution": solution,
-            "energy": answer.first.energy,
             "runtime": solve_time,
-            "info": info,
+            "answer": answer,
         }
 
     def __needed_bitnum(self, decnum):
@@ -100,5 +109,7 @@ class QuboSPBinary:
                     myQUBOMatrix[i, i] -= 2 * P3 * ldict[i]
                     for j in ldict:
                         myQUBOMatrix[i, j] += P3 * ldict[i] * ldict[j]
-
+        print(f"myQUBOMatrix = {myQUBOMatrix}")
+        # shape
+        print(f"myQUBOMatrix.shape = {myQUBOMatrix.shape}")
         return myQUBOMatrix

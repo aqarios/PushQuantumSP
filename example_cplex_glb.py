@@ -3,6 +3,11 @@ from models import SPCplex
 from evaluation.evaluation import SPEvaluation
 from plotting.sp_plot import SPPlot
 
+import matplotlib
+matplotlib.use('Qt5Agg')  # Or 'Qt5Agg', depending on your system
+import matplotlib.pyplot as plt
+
+
 params = {"lidar_density": 0.1, "street_point_density": 0.1}
 data = SPData().create_problem_from_glb_file(**params)
 plt = SPPlot(data).plot_problem()

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt   
 import networkx as nx
+import matplotlib.cm as cm
 
 class SPPlot():
      def __init__(self, data, evaluation = None):
@@ -60,4 +61,53 @@ class SPPlot():
 
           return plt
 
+     def plot_partitioned_graph(self, partitions, cut_edges):
+          """
+          Plot the graph with partitions highlighted.
 
+          Parameters:
+          - partitions: List of sets, each containing nodes in a partition.
+          - cut_edges: List of edges that are cut (inter-partition edges).
+
+          Returns:
+          - plt: The matplotlib.pyplot object with the plot.
+          """
+          G = self.data.G
+
+          # Generate positions ensuring consistent dimensionality
+          pos = {node: (node[0], node[1]) for node in G.nodes()}  # Use (x, y) for all nodes
+
+          # Assign unique colors to each partition
+          if len(partitions) <= 10:
+               cmap = cm.get_cmap("tab10")
+               colors = [cmap(i) for i in range(len(partitions))]
+          else:
+               cmap = cm.get_cmap("viridis", len(partitions))
+               colors = [cmap(i) for i in range(len(partitions))]
+
+          # Plot partitions
+          for i, part in enumerate(partitions):
+               nx.draw_networkx_nodes(
+                    G,
+                    pos,
+                    nodelist=list(part),
+                    node_color=[colors[i]] * len(part),
+                    node_size=50,
+                    label=f"Partition {i+1}",
+               )
+
+          # Plot intra-partition edges
+          for i, part in enumerate(partitions):
+               subgraph = G.subgraph(part)
+               nx.draw_networkx_edges(G, pos, edgelist=subgraph.edges(), edge_color=colors[i], alpha=0.7, width=2.0)
+
+          # Plot cut edges (inter-partition edges)
+          nx.draw_networkx_edges(G, pos, edgelist=cut_edges, edge_color="red", alpha=0.9, width=2.5, label="Cut Edges")
+
+          # Add grid, legend, and title
+          plt.axis("equal")
+          plt.grid(True)
+          plt.legend(loc="best")
+          plt.title("Partitioned Graph with Minimal Cuts")
+
+          return plt
