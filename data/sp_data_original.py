@@ -2,14 +2,13 @@ import json
 import math
 import numpy as np
 import networkx as nx
-import sklearn
+
 from pathlib import Path
 
 from .glb_reader_small import create_problem_from_glb
-from .sp_data import SPData
 
 
-class SPDataBG(SPData):
+class SPData: 
 
     def __init__(
             self, 
@@ -333,83 +332,5 @@ class SPDataBG(SPData):
         else: 
             return 1
 
-    def assess_interactions(self, num_partitions=2):
-        """
-        Assess interactions in the graph and compute minimal graph cuts.
 
-        Parameters:
-        - num_partitions: The number of partitions to divide the graph into.
 
-        Returns:
-        - partitions: A list of sets, each containing the nodes in a partition.
-        - cut_size: Total number of edges that are cut.
-        - intra_edges: Total number of intra-partition edges.
-        - inter_edges: Total number of inter-partition edges.
-        - complexity_info: Dictionary with additional complexity metrics.
-        """
-        import collections  # Ensure this is imported at the top of your file
-
-        G = self.G.copy()
-        
-        # Ensure the graph is undirected for partitioning algorithms
-        if G.is_directed():
-            G = G.to_undirected()
-
-        # Verify that all nodes are hashable
-        for node in G.nodes():
-            if not isinstance(node, collections.abc.Hashable):
-                raise TypeError(f"Unhashable node detected: {node}")
-
-        # Assign integer IDs to nodes for indexing
-        node_to_id = {node: idx for idx, node in enumerate(G.nodes())}
-        id_to_node = {idx: node for node, idx in node_to_id.items()}
-
-        # Create an adjacency matrix
-        adjacency_matrix = nx.to_numpy_array(G, nodelist=node_to_id.keys())
-
-        # Use spectral clustering for partitioning if num_partitions > 2
-        if num_partitions > 2:
-            from sklearn.cluster import SpectralClustering
-            sc = SpectralClustering(
-                n_clusters=num_partitions, 
-                affinity='precomputed', 
-                assign_labels='discretize',
-                random_state=100
-            )
-            labels = sc.fit_predict(adjacency_matrix)
-            partitions = [set() for _ in range(num_partitions)]
-            for idx, label in enumerate(labels):
-                node = id_to_node[idx]
-                partitions[label].add(node)
-        else:
-            # Use Kernighan-Lin algorithm for two partitions
-            partition = nx.algorithms.community.kernighan_lin_bisection(G)
-            partitions = [set(partition[0]), set(partition[1])]
-
-        # Compute intra and inter-partition edges
-        intra_edges = 0
-        inter_edges = 0
-        for i, part in enumerate(partitions):
-            subgraph = G.subgraph(part)
-            intra_edges += subgraph.number_of_edges()
-            for j in range(i+1, len(partitions)):
-                other_part = partitions[j]
-                # Use edge_boundary to find edges between partitions
-                cut_edges = list(nx.edge_boundary(G, part, other_part))
-                inter_edges += len(cut_edges)
-        
-        cut_size = inter_edges  # Total number of edges between partitions
-
-        # Complexity information
-        complexity_info = {
-            'num_nodes': G.number_of_nodes(),
-            'num_edges': G.number_of_edges(),
-            'num_partitions': num_partitions,
-            'nodes_per_partition': [len(part) for part in partitions],
-            'edges_per_partition': [G.subgraph(part).number_of_edges() for part in partitions],
-            'intra_edges': intra_edges,
-            'inter_edges': inter_edges,
-            'cut_size': cut_size,
-        }
-
-        return partitions, cut_size, intra_edges, inter_edges, complexity_info
