@@ -16,7 +16,8 @@ class SPData:
             vert_ang_min_deg = -16, 
             rad_max = 30, 
             halber_oeffnungswinkel_deg = 180, 
-            lidarwall_offset_m = 0.2
+            lidarwall_offset_m = 0.2,
+            graph = nx.Graph()
         ):
 
         self.vert_ang_max_deg = vert_ang_max_deg
@@ -25,7 +26,7 @@ class SPData:
         self.halber_oeffnungswinkel_deg = halber_oeffnungswinkel_deg 
         self.lidarwall_offset_m = lidarwall_offset_m
 
-        self.G = nx.Graph()
+        self.G = graph
         self.M = nx.Graph()
         self.O = nx.Graph()
         self.schemeGraph = nx.Graph()
@@ -332,5 +333,28 @@ class SPData:
         else: 
             return 1
 
+    def decompose(self, coords, radius):
+        new_graphs = []
+        for i, (x, y) in enumerate(coords):
+            in_circle = []
+            for node in self.G.nodes:
+                dist = math.sqrt((x - node[0])**2 + (y - node[1])**2)
+                if dist <= radius:
+                    in_circle.append(node)
 
+            new_graphs.append(self.G.subgraph(in_circle).copy())
 
+        new_sp_datas = []
+        for g in new_graphs:
+            to_remove = [node for node in g if len(list(g.neighbors(node))) == 0]
+            g.remove_nodes_from(to_remove)
+
+            data = SPData(graph=g)
+            data.listStreetPoints3D = [node for node in g if len(node) == 3]
+            data.listLidar3D = [node for node in g if len(node) == 5]
+            data.walls3D = self.walls3D
+            data.schemeGraph = self.schemeGraph
+
+            new_sp_datas.append(data)
+
+        return new_sp_datas

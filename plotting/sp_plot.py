@@ -2,9 +2,11 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 class SPPlot():
-     def __init__(self, data, evaluation = None):
+     def __init__(self, data, evaluation = None, coords = [], radius=0):
           self.data = data
           self.evaluation = evaluation
+          self.coords = coords
+          self.radius = radius
 
      def plot_solution(self, hide_never_covered = True):
           pos = {node: node for node in self.data.G.nodes()}
@@ -25,6 +27,10 @@ class SPPlot():
           edw = {node: node for node in self.data.M.edges()}
           
           nx.draw_networkx_edges(self.data.M,posw, edw, width=5.0, alpha=1, edge_color='black')
+
+          for coord in self.coords:
+              circle = plt.Circle(coord, self.radius, alpha=0.3, color='grey')
+              plt.gca().add_patch(circle)
 
           plt.axis('equal')
           plt.grid(True)
@@ -54,6 +60,10 @@ class SPPlot():
                posl = { (node[0], node[1]): (node[0], node[1]) for node in self.data.G.nodes()}
                edl = {  ((node[0][0], node[0][1]), (node[1][0], node[1][1])): (node[0], node[1]) for node in self.data.G.edges()}
                nx.draw_networkx_edges(self.data.G,posl, edl, width=2.0, alpha=0.5, edge_color='green')
+
+          for coord in self.coords:
+              circle = plt.Circle(coord, self.radius, alpha=0.3, color='grey')
+              plt.gca().add_patch(circle)
 
           plt.axis('equal')
           plt.grid(True)
