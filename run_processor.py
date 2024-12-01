@@ -12,13 +12,13 @@ from luna_sdk.schemas.optimization_formats.bqm import BQMSchema
 def do_optimization(Q):
 
     ls = LunaSolve(api_key=api_key)
-    case = 2
+    case = 1
     if case ==1:
         from luna_sdk.schemas.qpu_token import QpuToken, TokenProvider
         optimization = ls.optimization.create_from_qubo(name="My QUBO", matrix=Q)
 
         # Example of using QA using the D-Wave backend in LunaSolve
-        solution = ls.solution.create(
+        solution = ls.solution.create_blocking(
             encryption_key = "/WeNsI3W5FicFninWZeggZh5jFoAlvCISazcEkxlkr8=",
             optimization_id=optimization.id,
             solver_name="QA",
@@ -70,6 +70,12 @@ def do_optimization(Q):
                 ),
             ),
         )
+        
+        print(solution.head)
+
+        best_result = ls.solution.get_best_result(solution)
+        # print(best_result)
+        return best_result
     elif case == 2:
         optimization = ls.optimization.create_from_qubo(name="My QUBO", matrix=Q)
                 
@@ -101,8 +107,8 @@ def do_optimization(Q):
         job = ls.solution.create_blocking(
             encryption_key = "/WeNsI3W5FicFninWZeggZh5jFoAlvCISazcEkxlkr8=",
             optimization_id=optimization.id,
-            solver_name="SAGA+", # classical version
-            # solver_name="QAGA+",
+            # solver_name="SAGA+", # classical version
+            solver_name="QAGA+",
             provider="dwave",
             qpu_tokens=TokenProvider(
                 dwave=QpuToken(

@@ -109,7 +109,4 @@ class QuboSPBinaryBG:
                     myQUBOMatrix[i, i] -= 2 * P3 * ldict[i]
                     for j in ldict:
                         myQUBOMatrix[i, j] += P3 * ldict[i] * ldict[j]
-        print(f"myQUBOMatrix = {myQUBOMatrix}")
-        # shape
-        print(f"myQUBOMatrix.shape = {myQUBOMatrix.shape}")
         return myQUBOMatrix
