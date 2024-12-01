@@ -13,11 +13,12 @@ def do_optimization(Q):
 
     ls = LunaSolve(api_key=api_key)
     case = 1
-    if case ==1:
+    if case ==1: # Use D-Wave backend
         from luna_sdk.schemas.qpu_token import QpuToken, TokenProvider
         optimization = ls.optimization.create_from_qubo(name="My QUBO", matrix=Q)
 
         # Example of using QA using the D-Wave backend in LunaSolve
+        print("Solving the QUBO using the QA algorithm and the D-Wave backend")
         solution = ls.solution.create_blocking(
             encryption_key = "/WeNsI3W5FicFninWZeggZh5jFoAlvCISazcEkxlkr8=",
             optimization_id=optimization.id,
@@ -30,7 +31,7 @@ def do_optimization(Q):
                     "embedding_parameters": {
                         "max_no_improvement": 10,
                         "random_seed": None,
-                        "timeout": 1000,
+                        "timeout": 10,#1000,
                         "max_beta": None,
                         "tries": 10,
                         "inner_rounds": None,
@@ -70,27 +71,16 @@ def do_optimization(Q):
                 ),
             ),
         )
+        print("Solution received")
         
         print(solution.head)
 
         best_result = ls.solution.get_best_result(solution)
         # print(best_result)
         return best_result
-    elif case == 2:
+    elif case == 2: # Use LunaSolve backend
         optimization = ls.optimization.create_from_qubo(name="My QUBO", matrix=Q)
                 
-
-        # # Alternatively, define your QUBO as BQM
-        # bqm_data = {
-        #     "linear": {"0": 4.0, "1": -2.0, "2": 6.0, "3": 2.0, "4": 5.0},
-        #     "quadratic": {("3", "1"): 2.0, ("3", "2"): -6.0, ("4", "0"): -4.0},
-        #     "vartype": "BINARY"
-        # }
-
-        # bqm = BQMSchema(**bqm_data)
-
-        # # Upload your BQM to LunaSolve
-        # optimization = ls.optimization.create_from_bqm(name="My BQM", bqm=bqm)
 
         # Set your token to access D-Wave's hardware
         # ls.qpu_token.create(
@@ -104,11 +94,12 @@ def do_optimization(Q):
         from luna_sdk.schemas.qpu_token import QpuToken, TokenProvider
 
         # Solve the QUBO using the QAGA+ algorithm and retrieve a job
+        print("Solving the QUBO using LunaSolve's backend")
         job = ls.solution.create_blocking(
             encryption_key = "/WeNsI3W5FicFninWZeggZh5jFoAlvCISazcEkxlkr8=",
             optimization_id=optimization.id,
             # solver_name="SAGA+", # classical version
-            solver_name="QAGA+",
+            solver_name="QA",
             provider="dwave",
             qpu_tokens=TokenProvider(
                 dwave=QpuToken(
