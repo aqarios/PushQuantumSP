@@ -8,4 +8,11 @@
 
 
 
-### Running the 
+### Archievement
+
+- Final_result.ipynb
+- output/BMW_version test.pdf
+- output/Version 1-3 Subsystem test.pdf
+- output/QAOA.ipynb
+
+Unfortunately, since the qwave backend was not working, most of the results are coming from the Simulated Annealing Sampler. This is what it is.
